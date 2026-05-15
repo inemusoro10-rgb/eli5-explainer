@@ -2,13 +2,12 @@
 
 Paste any code snippet and get a plain-English explanation tailored to your level.
 
-Built this because I kept struggling to explain code to beginners at my Teen Coding Club — 
-so I made a tool that does it automatically at whatever level you need.
+A lot of the high school students I tutor want to get into tech but don't know where to start. With AI tools everywhere, most of them just copy-paste generated code without actually understanding what it does. I built this so they could get a simple, human breakdown of any code block, just paste and go.
 
 ## What it does
 
 - Paste any code (Python, JavaScript, C++, anything)
-- Pick your audience — 5-year-old, teenager, CS student, or senior dev
+- Pick your audience from a 5-year-old, teenager, CS student, or senior dev
 - Get a line-by-line breakdown, a real-world analogy, and what would break if you changed it
 
 ## Tech stack
