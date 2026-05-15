@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ELI5 Code Explainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #FFE055;
+      --pink:   #FF6B9D;
+      --purple: #A855F7;
+      --teal:   #2DD4BF;
+      --orange: #FF8C42;
+      --bg:     #0f0f13;
+      --card:   #1a1a24;
+      --border: #2e2e3e;
+      --text:   #f0f0f5;
+      --muted:  #8888aa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    /* subtle grid bg */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* header */
+    .header {
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .header h1 span.y { color: var(--yellow); }
+    .header h1 span.p { color: var(--pink); }
+
+    .header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--purple);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    textarea {
+      width: 100%;
+      background: #0f0f13;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--text);
+      resize: vertical;
+      min-height: 160px;
+      line-height: 1.6;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    textarea:focus { border-color: var(--purple); }
+    textarea::placeholder { color: var(--muted); }
+
+    /* level buttons */
+    .levels {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .lvl {
+      padding: 8px 16px;
+      border-radius: 50px;
+      border: 2px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lvl:hover { border-color: var(--purple); color: var(--text); }
+
+    .lvl.active[data-level="5yo"]     { background: var(--yellow); border-color: var(--yellow); color: #1a1a1a; }
+    .lvl.active[data-level="teen"]    { background: var(--pink);   border-color: var(--pink);   color: white; }
+    .lvl.active[data-level="student"] { background: var(--purple); border-color: var(--purple); color: white; }
+    .lvl.active[data-level="dev"]     { background: var(--teal);   border-color: var(--teal);   color: #1a1a1a; }
+
+    /* go button */
+    #go {
+      width: 100%;
+      padding: 14px;
+      background: var(--yellow);
+      color: #1a1a1a;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    #go:hover:not(:disabled) { background: #ffd700; transform: translateY(-1px); }
+    #go:active:not(:disabled) { transform: translateY(0); }
+    #go:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* output */
+    #output { display: none; }
+
+    .summary {
+      background: linear-gradient(135deg, #1e1030, #0e1e30);
+      border: 1px solid #3d2060;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: #e8d5ff;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .breakdown-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .line-chip {
+      background: #0f0f13;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--orange);
+      white-space: nowrap;
+      flex-shrink: 0;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .line-explain {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--text);
+      padding-top: 6px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .mini {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .mini-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .mini-label.analogy { color: var(--teal); }
+    .mini-label.breaks  { color: var(--pink); }
+
+    .mini p { font-size: 0.88rem; line-height: 1.55; color: #ccc; }
+
+    .error-box {
+      background: #1a0a0a;
+      border: 1px solid #5a1a1a;
+      border-radius: 10px;
+      padding: 1rem;
+      color: #ff8888;
+      font-size: 0.9rem;
+    }
+
+    /* loading dots */
+    .dots::after {
+      content: '';
+      animation: dots 1.2s steps(3, end) infinite;
+    }
+    @keyframes dots {
+      0%   { content: ''; }
+      33%  { content: '.'; }
+      66%  { content: '..'; }
+      100% { content: '...'; }
+    }
+
+    @media (max-width: 500px) {
+      .two-col { grid-template-columns: 1fr; }
+      .breakdown-item { flex-direction: column; gap: 4px; }
+      .line-chip { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1><span class="y">ELI5</span> Code <span class="p">Explainer</span> <span class="tag">beta</span></h1>
+    <p>paste code → pick a level → actually understand it</p>
+  </div>
+
+  <div class="card">
+    <div class="card-label">your code</div>
+    <textarea id="code-input" placeholder="# paste anything here — python, js, c++, whatever&#10;def factorial(n):&#10;    if n == 0:&#10;        return 1&#10;    return n * factorial(n - 1)"></textarea>
+
+    <div class="card-label" style="margin-top:1.2rem">explain it like i'm a...</div>
+    <div class="levels">
+      <button class="lvl" data-level="5yo">🧒 5-year-old</button>
+      <button class="lvl" data-level="teen">🎮 teenager</button>
+      <button class="lvl active" data-level="student">📚 cs student</button>
+      <button class="lvl" data-level="dev">💻 senior dev</button>
+    </div>
+
+    <button id="go" onclick="runExplain()">explain this code ✦</button>
+  </div>
+
+  <div id="output">
+    <div class="card">
+      <div id="result-body"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let level = "student"
+
+  document.querySelectorAll(".lvl").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".lvl").forEach(b => b.classList.remove("active"))
+      btn.classList.add("active")
+      level = btn.dataset.level
+    })
+  })
+
+  async function runExplain() {
+    const code = document.getElementById("code-input").value.trim()
+    if (!code) {
+      alert("paste some code first!")
+      return
+    }
+
+    const btn = document.getElementById("go")
+    btn.disabled = true
+    btn.innerHTML = '<span class="dots">thinking</span>'
+
+    const out = document.getElementById("output")
+    const body = document.getElementById("result-body")
+    out.style.display = "none"
+
+    try {
+      const resp = await fetch("/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, level })
+      })
+
+      const data = await resp.json()
+
+      if (data.error) {
+        body.innerHTML = `<div class="error-box">${esc(data.error)}</div>`
+      } else {
+        showResult(data)
+      }
+
+      out.style.display = "block"
+    } catch(e) {
+      body.innerHTML = `<div class="error-box">something went wrong — check the terminal</div>`
+      out.style.display = "block"
+    }
+
+    btn.disabled = false
+    btn.innerHTML = "explain this code ✦"
+  }
+
+  function showResult(data) {
+    // build breakdown html
+    let bhtml = data.breakdown.map(item => `
+      <div class="breakdown-item">
+        <div class="line-chip" title="${esc(item.line)}">${esc(item.line)}</div>
+        <div class="line-explain">${esc(item.explanation)}</div>
+      </div>
+    `).join("")
+
+    document.getElementById("result-body").innerHTML = `
+      <div class="summary">${esc(data.summary)}</div>
+      <div class="section-label">line by line</div>
+      ${bhtml}
+      <div class="two-col">
+        <div class="mini">
+          <div class="mini-label analogy">analogy</div>
+          <p>${esc(data.analogy)}</p>
+        </div>
+        <div class="mini">
+          <div class="mini-label breaks">what breaks?</div>
+          <p>${esc(data.what_breaks)}</p>
+        </div>
+      </div>
+    `
+  }
+
+  // basic xss protection
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+  }
+</script>
+</body>
+</html>
